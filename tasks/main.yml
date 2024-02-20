@@ -18,17 +18,14 @@
     - prometheus_run
 
 - include_tasks: install.yml
-  become: true
   tags:
     - prometheus_install
 
 - include_tasks: configure.yml
-  become: true
   tags:
     - prometheus_configure
 
 - name: ensure prometheus service is started and enabled
-  become: true
   systemd:
     daemon_reload: true
     name: prometheus
