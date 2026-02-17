@@ -69,17 +69,24 @@
       notify:
         - restart prometheus
 
+    - name: check if console templates exist
+      stat:
+        path: "/tmp/prometheus-{{ prometheus_version }}.linux-{{ go_arch }}/{{ item }}"
+      with_items:
+        - console_libraries
+        - consoles
+      register: _console_templates
+
     - name: propagate official console templates
       copy:
-        src: "/tmp/prometheus-{{ prometheus_version }}.linux-{{ go_arch }}/{{ item }}/"
-        dest: "{{ prometheus_config_dir }}/{{ item }}/"
+        src: "/tmp/prometheus-{{ prometheus_version }}.linux-{{ go_arch }}/{{ item.item }}/"
+        dest: "{{ prometheus_config_dir }}/{{ item.item }}/"
         remote_src: yes
         mode: 0644
         owner: root
         group: root
-      with_items:
-        - console_libraries
-        - consoles
+      with_items: "{{ _console_templates.results }}"
+      when: item.stat.exists
       notify:
         - restart prometheus
   when:
